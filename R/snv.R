@@ -59,6 +59,9 @@ snv <- function(input_file = NULL, ref_file = system.file("extdata", package="ch
             vcf_ <- read.table(vcf_edit, header = T, sep = "\t", stringsAsFactors = F)
         }
 
+        #convert logical columns to single letters
+        vcf_[,sapply(vcf_,class) == "logical"] <- sapply(vcf_[,sapply(vcf_,class) == "logical"], function(i) substr(as.character(i),1,1))
+
         # Create directory that contains the output files
         out_dir = paste(input_file,as.character(read_depth), sep="_")
         dir.create(out_dir)
