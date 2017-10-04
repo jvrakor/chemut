@@ -325,6 +325,7 @@ snv <- function(input_file = NULL, ref_file = system.file("extdata", package="ch
             for( j in seq(dim(vcf_filter3_2)[1])){
                 vcf_filter3_2$dna_change[j] <- paste(vcf_filter3_2$REF[j], ">", vcf_filter3_2$ALT[j], sep="")
             }
+            
 
             # Count the number of mutation events on each gene (count one for each of
             ## the variants on the same gene among all strains)
@@ -365,10 +366,10 @@ snv <- function(input_file = NULL, ref_file = system.file("extdata", package="ch
             codon_dna = codon_dna_mut = codon_pro = codon_pro_mut = aa_pos = splice_variant = other_splice_variant =  c()
 
             for(i in seq(dim(var_filtered_concise)[1])){
-
+                print(i)
+                print(length(aa_pos))
                 s_ <- var_filtered_concise[i,]
                 s_gr <- GRanges(s_$CHROM, IRanges(start = (s_$POS), end = (s_$POS)))
-
                 ov_orf <- findOverlaps(dd_gr, s_gr) # Find if variant lies on a ORF
                 if (length(ov_orf) == 0) { # If the variant is not in any ORF
                     codon_dna <- c(codon_dna, "intergenic")
@@ -479,7 +480,9 @@ snv <- function(input_file = NULL, ref_file = system.file("extdata", package="ch
                             } else {codon_variant_ntg[c_id] <- tolower(seqinr::comp(as.character(s_$ALT)))}
 
                             codon_dna_mut = c(codon_dna_mut, paste(codon_variant_ntg, collapse="")) # mutant codon
-                            aa_ = grep(as.character(s_$POS), codon_pos) ; aa_pos = c(aa_pos, aa_) # amino acid position
+                            aa_ = grep(as.character(s_$POS), codon_pos)[1] ; aa_pos = c(aa_pos, aa_) # amino acid position
+                            print(aa_)
+                            print(c(aa_pos, aa_))
 
                             codon_variant_translate <- as.character(seqinr::translate(codon_variant))
                             codon_variant_ntg_translate <- as.character(seqinr::translate(codon_variant_ntg))
@@ -487,12 +490,15 @@ snv <- function(input_file = NULL, ref_file = system.file("extdata", package="ch
                             codon_pro <- c(codon_pro, codon_variant_translate)
                             codon_pro_mut <- c(codon_pro_mut, codon_variant_ntg_translate)
                         }
+                        
                     }
+                print("updated")
+                print(length(aa_pos))
+                print(" ")
                 }
             }
-
+ 
             var_filtered_concise$codon_dna <- codon_dna ; var_filtered_concise$codon_dna_mut = codon_dna_mut
-
             # Add codon usage frequency
             codon_bias <- read.table(file = file.path(ref_file, "dd_codon_bias.txt.gz"), header = T, sep="\t", stringsAsFactors = F)
             codon_freq <- c(); codon_freq_mut <- c()
@@ -511,10 +517,15 @@ snv <- function(input_file = NULL, ref_file = system.file("extdata", package="ch
                 } else {codon_freq_mut <- c(codon_freq_mut, "NA")}
             }
             var_filtered_concise$codon_freq_mut <- codon_freq_mut
-
-
+            
+            print(var_filtered_concise)
+            print(nrow(var_filtered_concise))
             var_filtered_concise$codon_pro <- codon_pro ; var_filtered_concise$codon_pro_mut = codon_pro_mut
+            print("f")
+            print(aa_pos)
+            print(length(aa_pos))
             var_filtered_concise$aa_pos <- aa_pos ; var_filtered_concise$splice_variant <- splice_variant
+            print("g")
             var_filtered_concise$other_splice_variants <- other_splice_variant
 
             # Mark synonymous (syn), missense(mis), nonsense(non), intergenic (inter), intronic (intron), splice_donor, splice_acceptor
